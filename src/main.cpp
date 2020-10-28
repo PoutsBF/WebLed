@@ -9,6 +9,19 @@
 
 #include <SPIFFSEditor.h>
 
+#include <WS2812FX.h>
+
+// ----- config de la barette neoPixel ---
+// patte connectée sur SDin
+#define LED_PIN D1
+// nombre de leds
+#define LED_COUNT 8
+// définir les intervals des leds
+unsigned long led_interval = 5000;
+// création de l'objet led
+WS2812FX leds = WS2812FX(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800);
+
+// ----- création des objets serveurs et paramètres ---
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
@@ -25,6 +38,9 @@ void onWsEvent( AsyncWebSocket *server,
                 uint8_t *data, 
                 size_t len);
 
+/******************************************************************************
+/   SETUP
+/*****************************************************************************/
 void setup() 
 {
     Serial.begin(115200);
@@ -141,14 +157,42 @@ void setup()
     Serial.println("Ready");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
+
+    leds.init();
+    leds.setBrightness(255);
+    leds.setSpeed(1000);
+    leds.setColor(0x007BFF);
+    leds.setMode(FX_MODE_STATIC);
+    leds.start();
 }
 
-void loop() 
+/******************************************************************************
+*   LOOP
+******************************************************************************/
+void loop()
 {
+    static unsigned long led_tempo = 0;
+
+    unsigned long now = millis();
+
     ArduinoOTA.handle();
     ws.cleanupClients();
+
+    leds.service();
+
+    if((millis() - led_tempo) > led_interval)
+    {
+        leds.setMode((leds.getMode() + 1) % leds.getModeCount());
+        Serial.printf("mode : %3d / %3d\n", leds.getMode(), leds.getModeCount());
+        led_tempo = now;
+    }
 }
 
+/******************************************************************************
+/   Fonctions  
+/*****************************************************************************/
+//-------------------------------------------------------------------------
+// onWsEvent : gestion du web socket 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
 {
     if (type == WS_EVT_CONNECT)
