@@ -11,6 +11,8 @@
 
 #include <WS2812FX.h>
 
+#include <gestionBP.h>
+
 // ----- config de la barette neoPixel ---
 // patte connectée sur SDin
 #define LED_PIN D1
@@ -38,14 +40,13 @@ void onWsEvent( AsyncWebSocket *server,
                 uint8_t *data, 
                 size_t len);
 
+GestionBP gestionBP;
+
 /******************************************************************************
-/   SETUP
-/*****************************************************************************/
+*   SETUP
+******************************************************************************/
 void setup() 
 {
-
-    attachInterrupt(D0, void*, );
-
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 
@@ -175,25 +176,83 @@ void setup()
 void loop()
 {
     static unsigned long led_tempo = 0;
+    static uint8_t modeLed = 0;
 
     unsigned long now = millis();
+    BP_struct_msg msg;
 
     ArduinoOTA.handle();
     ws.cleanupClients();
 
     leds.service();
 
-    if((millis() - led_tempo) > led_interval)
+    // if((millis() - led_tempo) > led_interval)
+    // {
+    //     leds.setMode((leds.getMode() + 1) % leds.getModeCount());
+    //     Serial.printf("mode : %3d / %3d\n", leds.getMode(), leds.getModeCount());
+    //     led_tempo = now;
+    // }
+
+    if(gestionBP.handle(&msg))
     {
-        leds.setMode((leds.getMode() + 1) % leds.getModeCount());
-        Serial.printf("mode : %3d / %3d\n", leds.getMode(), leds.getModeCount());
-        led_tempo = now;
+        switch (msg.idBP)
+        {
+            case 0 :
+            {
+                if (msg.idMsg == BP_MESS_APPUIE_COURT)
+                {
+                    modeLed++;
+                    if (modeLed == leds.getModeCount())
+                        modeLed = 0;
+                }
+                else if (msg.idMsg == BP_MESS_APPUIE_LONG)
+                {
+                    modeLed += 5;
+                    if (modeLed > leds.getModeCount())
+                        modeLed = 0;
+                }
+                        } break;
+            case 1 :
+            {
+                if (msg.idMsg == BP_MESS_APPUIE_COURT)
+                {
+                    if (modeLed == 0)
+                    {
+                        modeLed = leds.getModeCount() - 1;
+                    }
+                    else
+                    {
+                        modeLed--;
+                    }
+                }
+                else if (msg.idMsg == BP_MESS_APPUIE_LONG)
+                {
+                    if (modeLed < 5)
+                    {
+                        modeLed = leds.getModeCount() - 1;
+                    }
+                    else
+                    {
+                        modeLed -= 5;
+                    }
+                }
+            }
+            break;
+            case 2 :
+            {
+                if(msg.idMsg == BP_MESS_APPUIE_DOUBLE)
+                {
+                    modeLed = 0;
+                }
+            } break;
+        }
+        Serial.printf("mode led : %d\n", modeLed);
     }
 }
 
 /******************************************************************************
-/   Fonctions  
-/*****************************************************************************/
+*   Fonctions  
+******************************************************************************/
 //-------------------------------------------------------------------------
 // onWsEvent : gestion du web socket 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)

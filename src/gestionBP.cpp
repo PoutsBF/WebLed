@@ -47,33 +47,35 @@ ICACHE_RAM_ATTR void GestionBP::interruption(void)
     uint8_t BP1_val = digitalRead(BP1_pin);
     uint8_t BP2_val = digitalRead(BP2_pin);
 
-    if ((BP0_p != BP0_pin) && ((time - BP0_rebond) > BP_delai_rebond))
+    if ((BP0_p != BP0_val) && ((time - BP0_rebond) > BP_delai_rebond))
     {
-        etat = BP0_p = BP0_pin;
+        etat = BP0_p = BP0_val;
         BP = 0;
         BP_delta = time - BP0_timer_p;
         BP0_timer_p = time;
         BP0_rebond = time;
+        push(BP, etat, BP_delta);
     }
-    else if ((BP1_p != BP1_pin) && ((time - BP1_rebond) > BP_delai_rebond))
+    else if ((BP1_p != BP1_val) && ((time - BP1_rebond) > BP_delai_rebond))
     {
-        etat = BP1_p = BP1_pin;
+        etat = BP1_p = BP1_val;
         BP = 1;
         BP_delta = time - BP1_timer_p;
         BP1_timer_p = time;
         BP1_rebond = time;
+        push(BP, etat, BP_delta);
     }
-    else if ((BP2_p != BP2_pin) && ((time - BP2_rebond) > BP_delai_rebond))
+    else if ((BP2_p != BP2_val) && ((time - BP2_rebond) > BP_delai_rebond))
     {
-        etat = BP2_p = BP2_pin;
+        etat = BP2_p = BP2_val;
         BP = 2;
         BP_delta = time - BP2_timer_p;
         BP2_timer_p = time;
         BP2_rebond = time;
+        push(BP, etat, BP_delta);
     }
-
-    push(BP, etat, BP_delta);
 }
+
 
 void GestionBP::push(uint8_t idBP, uint8_t etat, unsigned long delta)
 {
@@ -87,13 +89,14 @@ void GestionBP::push(uint8_t idBP, uint8_t etat, unsigned long delta)
             pile_pos_entree = 0;
     }
 }
+
 uint8_t GestionBP::pop(uint8_t *idBP, uint8_t *etat, unsigned long *delta)
 {
-    if (pile[pile_pos_sortie].idBP == 0xFF)
+    if (pile[pile_pos_sortie].idBP != 0xFF)
     {
-        pile[pile_pos_sortie].idBP = *idBP;
-        pile[pile_pos_sortie].etat = *etat;
-        pile[pile_pos_sortie].delta = *delta;
+        *idBP = pile[pile_pos_sortie].idBP;
+        *etat = pile[pile_pos_sortie].etat;
+        *delta = pile[pile_pos_sortie].delta;
         pile_pos_sortie++;
         if (pile_pos_sortie == BP_PILE_TAILLE)
             pile_pos_sortie = 0;
@@ -112,10 +115,13 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
     static unsigned long delta_mode_2 = 0;
 
     BP_struct_pile pile_traitement;
-    unsigned long delta_0;
+    uint8_t retour = 0;
+
+    msg->idBP = 0xFF;
 
     if (pop(&pile_traitement.idBP, &pile_traitement.etat, &pile_traitement.delta))
     {
+        Serial.println("message arrivé...");
         switch (mode)
         {
             case 0 :
@@ -136,7 +142,9 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
                     else                            // appuie long
                     {
                                                     // on envoie directement 
-                        push_msg({pile_traitement.idBP, BP_MESS_APPUIE_LONG});
+                        msg->idBP = pile_traitement.idBP;
+                        msg->idMsg = BP_MESS_APPUIE_LONG;
+                        retour = 1;
                                                     // repart dans le mode d'attente
                         mode = 0;
                     }                    
@@ -149,7 +157,7 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
             } break;
             case 2 :
             {
-                if (pile_traitement.etat == 1)      // Front descendant, à tester suivant le delta
+                if (pile_traitement.etat == 1)      // Front ascendant, à tester suivant le delta
                 {
                     if(pile_traitement.delta < BP_delai_double)
                     {
@@ -160,7 +168,9 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
                     else                            // appuie long
                     {
                                                     // on envoie directement 
-                        push_msg({pile_traitement.idBP, BP_MESS_APPUIE_COURT});
+                        msg->idBP = pile_traitement.idBP;
+                        msg->idMsg = BP_MESS_APPUIE_COURT;
+                        retour = 1;
                                                     // repart dans le mode d'attente
                         mode = 0;
                     }                    
@@ -176,13 +186,18 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
                 {
                     if(pile_traitement.delta < BP_delai_appuie_court)
                     {
-                        push_msg({pile_traitement.idBP, BP_MESS_APPUIE_DOUBLE});
+                        msg->idBP = pile_traitement.idBP;
+                        msg->idMsg = BP_MESS_APPUIE_DOUBLE;
+                        retour = 1;
                     }
                     else                            // appuie long
                     {
                                                     // on envoie directement 
-                        push_msg({pile_traitement.idBP, BP_MESS_APPUIE_COURT});
-                        push_msg({pile_traitement.idBP, BP_MESS_APPUIE_LONG});
+                                                    // Chercher une solution pour envoyer aussi
+                                                    // le premier clic...
+                        msg->idBP = pile_traitement.idBP;
+                        msg->idMsg = BP_MESS_APPUIE_LONG;
+                        retour = 1;
                     }                    
                 }
                 mode = 0;        // repart dans le mode d'attente
@@ -192,9 +207,21 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
     else
     {
         // Cas particulier du mode 2 : au delà du délai, envoie un message court et repasse en mode 2
-        if()
+        if(mode == 2)
+        {
+            if ((millis() - delta_mode_2) > BP_delai_double)
+            {
+                // on envoie directement
+                msg->idBP = pile_traitement.idBP;
+                msg->idMsg = BP_MESS_APPUIE_COURT;
+                retour = 1;
+                // repart dans le mode d'attente
+                mode = 0;
+            }
+        }
     }
-    
+
+    return retour;
 }
 
 //-------------------------------------------------- That's all, Folks !!! ----
