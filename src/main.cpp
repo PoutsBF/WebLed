@@ -43,6 +43,9 @@ void onWsEvent( AsyncWebSocket *server,
 /*****************************************************************************/
 void setup() 
 {
+
+    attachInterrupt(D0, void*, );
+
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 
