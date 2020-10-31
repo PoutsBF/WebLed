@@ -162,6 +162,8 @@ void setup()
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
+    gestionBP.init();
+
     leds.init();
     leds.setBrightness(255);
     leds.setSpeed(1000);
@@ -175,10 +177,10 @@ void setup()
 ******************************************************************************/
 void loop()
 {
-    static unsigned long led_tempo = 0;
+//    static unsigned long led_tempo = 0;
     static uint8_t modeLed = 0;
 
-    unsigned long now = millis();
+//    unsigned long now = millis();
     BP_struct_msg msg;
 
     ArduinoOTA.handle();

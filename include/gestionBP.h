@@ -53,24 +53,19 @@ struct BP_struct_pile
 class GestionBP
 {
     public:
-        GestionBP(void);
+//        GestionBP(void);
+        void init(void);
         static ICACHE_RAM_ATTR void interruption(void);
 
         uint8_t handle(BP_struct_msg *msg);
-//        BP_struct_msg pop_msg();
 
     private:
         static void push(uint8_t idBP, uint8_t etat, unsigned long delta);
         static uint8_t pop(uint8_t *idBP, uint8_t *etat, unsigned long *delta);
-//        uint8_t push_msg(BP_struct_msg);
 
         static BP_struct_pile pile[BP_PILE_TAILLE];
         static uint8_t pile_pos_entree;
         static uint8_t pile_pos_sortie;
-
-        // BP_struct_msg pile_msg[BP_PILE_MSG_TAILLE];
-        // static uint8_t pile_msg_pos_entree;
-        // static uint8_t pile_msg_pos_sortie;
 };
 
 #endif

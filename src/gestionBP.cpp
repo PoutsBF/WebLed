@@ -9,7 +9,9 @@
 #include <Arduino.h>
 #include <gestionBP.h>
 
-GestionBP::GestionBP(void)
+//GestionBP::GestionBP(void){}
+
+void GestionBP::init(void)
 {
     pinMode(BP0_pin, INPUT_PULLUP);
     pinMode(BP1_pin, INPUT_PULLUP);
