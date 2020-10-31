@@ -10,6 +10,9 @@
 #include <gestionBP.h>
 
 //GestionBP::GestionBP(void){}
+uint8_t GestionBP::pile_pos_entree = 0;
+uint8_t GestionBP::pile_pos_sortie = 0;
+BP_struct_pile GestionBP::pile[] = {0xFF, 0xFF, 0xFF};
 
 void GestionBP::init(void)
 {
@@ -24,8 +27,7 @@ void GestionBP::init(void)
     {
         pile[i].idBP = 0xFF;
     }
-    pile_pos_entree = 0;
-    pile_pos_sortie = 0;
+    
 }
 
 ICACHE_RAM_ATTR void GestionBP::interruption(void)

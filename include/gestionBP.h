@@ -54,10 +54,10 @@ class GestionBP
 {
     public:
 //        GestionBP(void);
-        void init(void);
+        static void init(void);
         static ICACHE_RAM_ATTR void interruption(void);
 
-        uint8_t handle(BP_struct_msg *msg);
+        static uint8_t handle(BP_struct_msg *msg);
 
     private:
         static void push(uint8_t idBP, uint8_t etat, unsigned long delta);
