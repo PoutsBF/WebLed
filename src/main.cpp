@@ -197,6 +197,7 @@ void loop()
 
     if(gestionBP.handle(&msg))
     {
+        Serial.printf("BP%d - msg %d\n", msg.idBP, msg.idMsg);
         switch (msg.idBP)
         {
             case 0 :

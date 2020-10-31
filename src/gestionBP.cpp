@@ -45,8 +45,6 @@ ICACHE_RAM_ATTR void GestionBP::interruption(void)
     static unsigned long BP2_rebond     = 0;
 
     unsigned long BP_delta;
-    uint8_t BP;
-    uint8_t etat;
 
     unsigned long time = millis();
     uint8_t BP0_val = ! digitalRead(BP0_pin);
@@ -55,33 +53,29 @@ ICACHE_RAM_ATTR void GestionBP::interruption(void)
 
     if ((BP0_p != BP0_val) && ((time - BP0_rebond) > BP_delai_rebond))
     {
-        etat = BP0_p = BP0_val;
-        BP = 0;
+        BP0_p = BP0_val;
         BP_delta = time - BP0_timer_p;
         BP0_timer_p = time;
         BP0_rebond = time;
-        push(BP, etat, BP_delta);
+        push(0, BP0_val, BP_delta);
     }
     else if ((BP1_p != BP1_val) && ((time - BP1_rebond) > BP_delai_rebond))
     {
-        etat = BP1_p = BP1_val;
-        BP = 1;
+        BP1_p = BP1_val;
         BP_delta = time - BP1_timer_p;
         BP1_timer_p = time;
         BP1_rebond = time;
-        push(BP, etat, BP_delta);
+        push(1, BP1_val, BP_delta);
     }
     else if ((BP2_p != BP2_val) && ((time - BP2_rebond) > BP_delai_rebond))
     {
-        etat = BP2_p = BP2_val;
-        BP = 2;
+        BP2_p = BP2_val;
         BP_delta = time - BP2_timer_p;
         BP2_timer_p = time;
         BP2_rebond = time;
-        push(BP, etat, BP_delta);
+        push(2, BP2_val, BP_delta);
     }
 }
-
 
 void GestionBP::push(uint8_t idBP, uint8_t etat, unsigned long delta)
 {
@@ -120,6 +114,7 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
 {
     static uint8_t mode = 0;
     static unsigned long delta_mode_2 = 0;
+    static uint8_t delta_mode_2_BP;
 
     BP_struct_pile pile_traitement;
     uint8_t retour = 0;
@@ -149,6 +144,7 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
                     {
                         delta_mode_2 = millis();        // note l'heure pour ne pas attendre
                                                         // indéfiniment le prochain appuie
+                        delta_mode_2_BP = msg->idBP;
                         mode = 2;                       // attend pour vérifier s'il y a un second appuie
                     }
                     else                            // appuie long
@@ -223,7 +219,7 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
             if ((millis() - delta_mode_2) > BP_delai_double)
             {
                 // on envoie directement
-                msg->idBP = pile_traitement.idBP;
+                msg->idBP = delta_mode_2_BP;
                 msg->idMsg = BP_MESS_APPUIE_COURT;
                 retour = 1;
                 // repart dans le mode d'attente
@@ -231,6 +227,9 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
             }
         }
     }
+
+    if(retour)
+        Serial.printf("reçu : pileBP:%d BP%d msg: %d\n", pile_traitement.idBP, msg->idBP, msg->idMsg);
 
     return retour;
 }
