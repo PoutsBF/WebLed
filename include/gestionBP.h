@@ -54,14 +54,14 @@ class GestionBP
 {
     public:
 //        GestionBP(void);
-        static void init(void);
+        void init(void);
         static ICACHE_RAM_ATTR void interruption(void);
 
-        static uint8_t handle(BP_struct_msg *msg);
+        uint8_t handle(BP_struct_msg *msg);
 
     private:
         static void push(uint8_t idBP, uint8_t etat, unsigned long delta);
-        static uint8_t pop(uint8_t *idBP, uint8_t *etat, unsigned long *delta);
+        uint8_t pop(uint8_t *idBP, uint8_t *etat, unsigned long *delta);
 
         static BP_struct_pile pile[BP_PILE_TAILLE];
         static uint8_t pile_pos_entree;

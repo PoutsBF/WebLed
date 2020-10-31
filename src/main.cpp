@@ -249,6 +249,7 @@ void loop()
             } break;
         }
         Serial.printf("mode led : %d\n", modeLed);
+        leds.setMode(modeLed);
     }
 }
 
