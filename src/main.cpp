@@ -33,6 +33,8 @@ const char *hostName = "esp-async";
 const char *http_username = "admin";
 const char *http_password = "admin";
 
+char json_liste_modes[2048];
+
 void onWsEvent( AsyncWebSocket *server, 
                 AsyncWebSocketClient *client, 
                 AwsEventType type, 
@@ -170,6 +172,17 @@ void setup()
     leds.setColor(0x007BFF);
     leds.setMode(FX_MODE_STATIC);
     leds.start();
+
+    for (uint8_t i = 0; i < leds.getModeCount(); i++)
+    {
+        char buffer[32];
+        snprintf(buffer, 32, ",\"mode%2d\": \"%s\"", i, (const char *)leds.getModeName(i));
+        strncat(json_liste_modes, buffer, 2048);
+    }
+    json_liste_modes[0] = '{';
+    strncat(json_liste_modes, "}", 2048);
+    Serial.printf("taille : %d - ", strlen(json_liste_modes));
+    Serial.println(json_liste_modes);
 }
 
 /******************************************************************************

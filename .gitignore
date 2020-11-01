@@ -32,3 +32,7 @@
 *.app
 
 include/WifiConfig.h
+.pio/build/esp12e/.sconsign37.dblite
+.pio/build/esp12e/firmware.bin
+.pio/build/esp12e/firmware.elf
+.pio/build/esp12e/firmware.bin

@@ -144,7 +144,7 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
                     {
                         delta_mode_2 = millis();        // note l'heure pour ne pas attendre
                                                         // indéfiniment le prochain appuie
-                        delta_mode_2_BP = msg->idBP;
+                        delta_mode_2_BP = pile_traitement.idBP;
                         mode = 2;                       // attend pour vérifier s'il y a un second appuie
                     }
                     else                            // appuie long
@@ -176,7 +176,6 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
                                                     // on envoie directement 
                         msg->idBP = pile_traitement.idBP;
                         msg->idMsg = BP_MESS_APPUIE_COURT;
-                        Serial.println("appuie court");        // DEBUG
                         retour = 1;
                                                     // repart dans le mode d'attente
                         mode = 0;
@@ -227,9 +226,6 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
             }
         }
     }
-
-    if(retour)
-        Serial.printf("reçu : pileBP:%d BP%d msg: %d\n", pile_traitement.idBP, msg->idBP, msg->idMsg);
 
     return retour;
 }
