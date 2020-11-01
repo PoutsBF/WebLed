@@ -1,77 +1,94 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<head>
-    <title>PempÉranda</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8" />
-    <link rel="stylesheet" type="text/css" href="w3.css">
-    <link rel="stylesheet" type="text/css" href="style.css">
-  <!--   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script> -->
-    <script src="https://code.highcharts.com/highcharts.js" crossorigin="anonymous"></script>
-    <script src="https://code.highcharts.com/modules/data.js" crossorigin="anonymous"></script>
-    <script src="https://code.highcharts.com/highcharts-more.js" crossorigin="anonymous"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js" crossorigin="anonymous"></script>
-    <script src="https://code.highcharts.com/modules/export-data.js" crossorigin="anonymous"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js" crossorigin="anonymous"></script>
-</head>
+    <title>gestion néopixel</title>
 
-<body class="w3-animate-opacity">
-    <div class="w3-card w3-blue w3-padding-small w3-center">
-        <h1>PempÉranda</h1>
-    </div>
+    <meta name="description" content="Source code generated using layoutit.com">
+    <meta name="author" content="LayoutIt!">
 
-    <div class="w3-padding w3-center">
-        <i>Stéphane Lepoutère</i>
-    </div>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+		integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="css/style.css" rel="stylesheet">
+    
+    <script type="text/javascript" src="js/colorpicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/themes.css" />
 
-    <div class="w3-margin w3-center w3-card w3-padding-24 jauge">
-        <p id="display">Non connecté</p>
-    </div>
-<div class="histo"></div>
-<div style="display:inline-block;" class="w3-margin w3-center w3-card w3-padding-24">
-    <div class="jauge">
-        <figure class="highcharts-figure">
-            <div id="containerTEMP"></div>
-        </figure>
-    </div>
 
-    <div class="jauge">
-        <figure class="highcharts-figure">
-            <div id="containerHR"></div>
-        </figure>
-    </div>
-    <div class="jauge">
-        <figure class="highcharts-figure">
-            <div id="containerPRESSION"></div>
-        </figure>
-    </div>
-    <div class="jauge">
-        <figure class="highcharts-figure">
-            <div id="containerGAZ"></div>
-        </figure>
-    </div>
+  </head>
+  <body>
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<h3>
+				Gestion bandeau néopixel
+			</h3>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4">
+			<div class="btn-group btn-group-vertical" role="group">
+			<button id="bt01" type="button" class="btn btn-success">
+				led 1
+			</button> 
+			<button id="bt02" type="button" class="btn btn-success">
+				led 2
+			</button> 
+			<button id="bt03" type="button" class="btn btn-success">
+				led 3
+			</button> 
+			<button id="bt04" type="button" class="btn btn-success">
+				led 4
+			</button> 
+			<button id="bt05" type="button" class="btn btn-success">
+				led 5
+			</button> 
+			<button id="bt06" type="button" class="btn btn-success">
+				led 6
+			</button> 
+			<button id="bt07" type="button" class="btn btn-success">
+				led 7
+			</button>
+			<button id="bt08" type="button" class="btn btn-success">
+				led 8
+			</button>
+			</div> 
+		</div>
+		<div class="col-md-4">
+    <select id="idSelectionMode" class="form-control" size="5">
+      <option>à compléter</option>
+      </select>
+		</div>
+		<div class="col-md-4">
+      <div id="color-picker" class="cp-default"></div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4">
+		</div>
+		<div class="col-md-4">
+			<p class="text-center">
+				Stéphane Lepoutère<br />(c) 2020
+			</p>
+		</div>
+		<div class="col-md-4">
+		</div>
+	</div>
 </div>
+	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+		integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+		crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+		integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+		crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+		integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+		crossorigin="anonymous"></script>
+    <script src="js/scripts.js"></script>
 
-    <div class="histo"></div>
-
-    <div class="w3-margin w3-center w3-card w3-padding-24">
-        <figure class="highcharts-figure">
-            <div id="container"></div>
-        </figure>
-    </div>
-    <!-- Les boutons ON / OFF -->
-    
-    <div class="w3-margin w3-center w3-card w3-padding-24">
-    
-        <h3 class="w3-padding">Allumer/Éteindre la LED</h3>
-        <button onclick="onButton()" class="w3-button w3-green w3-xlarge w3-ripple w3-wide" style="width:40%;">ON</button>
-        <!-- Bouton ON -->
-        <button onclick="offButton()" class="w3-button w3-red w3-xlarge w3-ripple w3-wide" style="width:40%;">OFF</button>
-        <!-- Bouton OFF -->
-        <br><br>
-    </div>
-</body>
-    <script type="text/javascript" src="script.js"></script>
-
+  </body>
 </html>

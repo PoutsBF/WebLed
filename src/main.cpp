@@ -175,14 +175,12 @@ void setup()
 
     for (uint8_t i = 0; i < leds.getModeCount(); i++)
     {
-        char buffer[32];
-        snprintf(buffer, 32, ",\"mode%2d\": \"%s\"", i, (const char *)leds.getModeName(i));
+        char buffer[40];
+        snprintf(buffer, 40, ",\"mode%2d\": \"%s\"", i, (const char *)leds.getModeName(i));
         strncat(json_liste_modes, buffer, 2048);
     }
     json_liste_modes[0] = '{';
     strncat(json_liste_modes, "}", 2048);
-    Serial.printf("taille : %d - ", strlen(json_liste_modes));
-    Serial.println(json_liste_modes);
 }
 
 /******************************************************************************
@@ -277,7 +275,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     if (type == WS_EVT_CONNECT)
     {
         Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
-        client->printf("Hello Client %u :)", client->id());
+        client->text(json_liste_modes);
         client->ping();
     }
     else if (type == WS_EVT_DISCONNECT)
@@ -296,33 +294,18 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     {
         AwsFrameInfo *info = (AwsFrameInfo *)arg;
         String msg = "";
-        if (info->final && info->index == 0 && info->len == len)
-        {
             //the whole message is in a single frame and we got all of it's data
             Serial.printf("ws[%s][%u] %s-message[%llu]: ", server->url(), client->id(), (info->opcode == WS_TEXT) ? "text" : "binary", info->len);
 
             if (info->opcode == WS_TEXT)
             {
+                
                 for (size_t i = 0; i < info->len; i++)
                 {
                     msg += (char)data[i];
                 }
             }
-            else
-            {
-                char buff[3];
-                for (size_t i = 0; i < info->len; i++)
-                {
-                    sprintf(buff, "%02x ", (uint8_t)data[i]);
-                    msg += buff;
-                }
-            }
             Serial.printf("%s\n", msg.c_str());
 
-            if (info->opcode == WS_TEXT)
-                client->text("I got your text message");
-            else
-                client->binary("I got your binary message");
-        }
     }
 }
