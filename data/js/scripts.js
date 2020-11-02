@@ -10,7 +10,17 @@ function domReady(f) {
 
 domReady(function()
 {
-    ColorPicker(document.getElementById('color-picker'));
+    function onSelectionMode() {
+        if (connection.readyState === 1) {
+            connection.send("{\"mode\":" + document.getElementById("idSelectionMode").selectedIndex + "}");
+        }
+    }
+
+    document.getElementById("idSelectionMode").addEventListener("change", onSelectionMode);
+
+    ColorPicker(document.getElementById('color-picker'), function (hex, hsv, rgb) {
+        connection.send("{\"couleur\":" + ((rgb.r << 16) + (rgb.g << 8) + (rgb.b)) + "}");
+    });
 
     var connection = new WebSocket('ws://' + location.hostname + '/ws');
     connection.onopen = function ()

@@ -13,6 +13,8 @@
 
 #include <gestionBP.h>
 
+#include <ArduinoJson.h>
+
 // ----- config de la barette neoPixel ---
 // patte connectée sur SDin
 #define LED_PIN D1
@@ -50,7 +52,7 @@ GestionBP gestionBP;
 void setup() 
 {
     Serial.begin(115200);
-    Serial.setDebugOutput(true);
+//    Serial.setDebugOutput(true);
 
     //-----------------------------------------------------------------------
     // Configuration du WIFI
@@ -169,7 +171,7 @@ void setup()
     leds.init();
     leds.setBrightness(255);
     leds.setSpeed(1000);
-    leds.setColor(0x007BFF);
+    leds.setColor(0x000010);
     leds.setMode(FX_MODE_STATIC);
     leds.start();
 
@@ -272,6 +274,8 @@ void loop()
 // onWsEvent : gestion du web socket 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
 {
+    static StaticJsonDocument<200> doc;
+
     if (type == WS_EVT_CONNECT)
     {
         Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
@@ -299,13 +303,36 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 
             if (info->opcode == WS_TEXT)
             {
-                
+                // ---------------------- Debug
                 for (size_t i = 0; i < info->len; i++)
                 {
                     msg += (char)data[i];
                 }
-            }
-            Serial.printf("%s\n", msg.c_str());
+                Serial.printf("%s\n", msg.c_str());
+                // ---------------------- Debug
 
+                // Deserialize the JSON document et
+                // Test if parsing succeeds.
+                if (deserializeJson(doc, data))
+                {
+                    Serial.println(F("deserializeJson() failed: "));
+                    return;
+                }
+                else
+                {
+                    JsonVariant mode = doc["mode"];
+                    if (!mode.isNull())
+                    {
+                        Serial.printf("mode : %d ", mode.as<uint8_t>());
+                        leds.setMode((uint8_t)mode.as<uint8_t>());
+                    }
+                    mode = doc["couleur"];
+                    if (!mode.isNull())
+                    {
+                        Serial.printf("couleur : %d ", mode.as<uint32_t>());
+                        leds.setColor(mode.as<uint32_t>());
+                    }
+                }
+            }
     }
 }
