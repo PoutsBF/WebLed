@@ -169,20 +169,27 @@ void setup()
     gestionBP.init();
 
     leds.init();
-    leds.setBrightness(255);
+    leds.setBrightness(50);
     leds.setSpeed(1000);
-    leds.setColor(0x000010);
-    leds.setMode(FX_MODE_STATIC);
+    leds.setColor(0x0000FF);
+    leds.setMode(FX_MODE_FIREWORKS_RANDOM);
     leds.start();
 
+// objectif : json_liste_mode = {modes:["mode a", "mode b"...]}
+    strncpy(json_liste_modes, "{modes:[", 2048);
     for (uint8_t i = 0; i < leds.getModeCount(); i++)
     {
         char buffer[40];
-        snprintf(buffer, 40, ",\"mode%2d\": \"%s\"", i, (const char *)leds.getModeName(i));
+        if(i == 0)
+            snprintf("'%s'", 40, (const char *)leds.getModeName(i));
+        else
+            snprintf(", '%s'", 40, (const char *)leds.getModeName(i));
+
         strncat(json_liste_modes, buffer, 2048);
     }
-    json_liste_modes[0] = '{';
-    strncat(json_liste_modes, "}", 2048);
+    strncat(json_liste_modes, "]}", 2048);
+    Serial.println(json_liste_modes);
+    Serial.printf("%d caractères", strlen(json_liste_modes));
 }
 
 /******************************************************************************
@@ -200,13 +207,6 @@ void loop()
     ws.cleanupClients();
 
     leds.service();
-
-    // if((millis() - led_tempo) > led_interval)
-    // {
-    //     leds.setMode((leds.getMode() + 1) % leds.getModeCount());
-    //     Serial.printf("mode : %3d / %3d\n", leds.getMode(), leds.getModeCount());
-    //     led_tempo = now;
-    // }
 
     if(gestionBP.handle(&msg))
     {
@@ -227,7 +227,7 @@ void loop()
                     if (modeLed > leds.getModeCount())
                         modeLed = 0;
                 }
-                        } break;
+            } break;
             case 1 :
             {
                 if (msg.idMsg == BP_MESS_APPUIE_COURT)
@@ -256,7 +256,15 @@ void loop()
             break;
             case 2 :
             {
-                if(msg.idMsg == BP_MESS_APPUIE_DOUBLE)
+                if (msg.idMsg == BP_MESS_APPUIE_COURT)
+                {
+                    leds.setSpeed((leds.getSpeed() > 10) ? (leds.getSpeed() - 1) : 0);
+                }
+                else if (msg.idMsg == BP_MESS_APPUIE_LONG)
+                {
+                    leds.setSpeed(leds.getSpeed() - 1);
+                }
+                else if (msg.idMsg == BP_MESS_APPUIE_DOUBLE)
                 {
                     modeLed = 0;
                 }
@@ -264,6 +272,11 @@ void loop()
         }
         Serial.printf("mode led : %d\n", modeLed);
         leds.setMode(modeLed);
+        char buffer[32];
+        snprintf(buffer, 32, "{mode:%d,speed:%d,couleur:%d,lum:%d}", 
+                    leds.getMode(), leds.getSpeed(),
+                    leds.getColor(), leds.getBrightness());
+        ws.textAll(buffer);
     }
 }
 
@@ -331,6 +344,18 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
                     {
                         Serial.printf("couleur : %d ", mode.as<uint32_t>());
                         leds.setColor(mode.as<uint32_t>());
+                    }
+                    mode = doc["lum"];
+                    if (!mode.isNull())
+                    {
+                        Serial.printf("luminosité : %d ", mode.as<uint8_t>());
+                        leds.setBrightness(mode.as<uint8_t>());
+                    }
+                    mode = doc["speed"];
+                    if (!mode.isNull())
+                    {
+                        Serial.printf("vitesse : %d ", mode.as<uint16_t>());
+                        leds.setSpeed(mode.as<uint16_t>());
                     }
                 }
             }

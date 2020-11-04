@@ -13,9 +13,15 @@
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
 		integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="css/style.css" rel="stylesheet">
-    
-    <script type="text/javascript" src="js/colorpicker.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/themes.css" />
+
+	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+		integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+		crossorigin="anonymous"></script>
+
+	<link rel="stylesheet" href="css/farbtastic.css" type="text/css" />
+	</script>
+	<script type="text/javascript" src="js/farbtastic.js"></script>
+	<script src="js/scripts.js"></script>
 
 
   </head>
@@ -24,47 +30,65 @@
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-md-12">
-			<h3>
+			<h1 class="text-center">
 				Gestion bandeau néopixel
-			</h3>
+			</h1>
 		</div>
 	</div>
 	<div class="row">
 		<div class="col-md-4">
-			<div class="btn-group btn-group-vertical" role="group">
-			<button id="bt01" type="button" class="btn btn-success">
-				led 1
-			</button> 
-			<button id="bt02" type="button" class="btn btn-success">
-				led 2
-			</button> 
-			<button id="bt03" type="button" class="btn btn-success">
-				led 3
-			</button> 
-			<button id="bt04" type="button" class="btn btn-success">
-				led 4
-			</button> 
-			<button id="bt05" type="button" class="btn btn-success">
-				led 5
-			</button> 
-			<button id="bt06" type="button" class="btn btn-success">
-				led 6
-			</button> 
-			<button id="bt07" type="button" class="btn btn-success">
-				led 7
-			</button>
-			<button id="bt08" type="button" class="btn btn-success">
-				led 8
-			</button>
-			</div> 
+		<form>
+			<div class="form-group">
+				<button id="bt01" type="button" class="btn btn-success">
+					led 1
+				</button>
+				<button id="bt02" type="button" class="btn btn-success">
+					led 2
+				</button>
+				<button id="bt03" type="button" class="btn btn-success">
+					led 3
+				</button>
+				<button id="bt04" type="button" class="btn btn-success">
+					led 4
+				</button>
+				<button id="bt05" type="button" class="btn btn-success">
+					led 5
+				</button>
+				<button id="bt06" type="button" class="btn btn-success">
+					led 6
+				</button>
+				<button id="bt07" type="button" class="btn btn-success">
+					led 7
+				</button>
+				<button id="bt08" type="button" class="btn btn-success">
+					led 8
+				</button>
+			</div>
+		</form>
 		</div>
 		<div class="col-md-4">
-    <select id="idSelectionMode" class="form-control" size="5">
-      <option>à compléter</option>
-      </select>
+			<form>
+				<select id="idSelectionMode" class="form-control" size="5">
+					<option>à compléter</option>
+				</select>
+				<div class="form-group">
+					<label for="rangeVitesse">Vitesse</label>
+					<input type="range" class="form-control-range" id="idVitesse" min="1" max="1000" step="20">
+					<label for="rangeBrillance">Brillance</label>
+					<input type="range" class="form-control-range" id="idLuminosite" min="0" max="255" step="5">
+				</div>
+			</form>
 		</div>
 		<div class="col-md-4">
-      <div id="color-picker" class="cp-default"></div>
+		<form>
+			<div class="form-group">
+				<div class="form-item">
+					<label for="color">Color:</label>
+					<input type="text" id="idColor" name="color" value="#000000" />
+				</div>
+				<div id="picker"></div>
+			</div>
+		</form>
 		</div>
 	</div>
 	<div class="row">
@@ -79,16 +103,12 @@
 		</div>
 	</div>
 </div>
-	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-		integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-		crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
 		integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
 		crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
 		integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
 		crossorigin="anonymous"></script>
-    <script src="js/scripts.js"></script>
 
   </body>
 </html>
