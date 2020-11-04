@@ -181,9 +181,9 @@ void setup()
     {
         char buffer[40];
         if(i == 0)
-            snprintf("'%s'", 40, (const char *)leds.getModeName(i));
+            snprintf(buffer, 40, "'%s'", (const char *)leds.getModeName(i));
         else
-            snprintf(", '%s'", 40, (const char *)leds.getModeName(i));
+            snprintf(buffer, 40, ", '%s'", (const char *)leds.getModeName(i));
 
         strncat(json_liste_modes, buffer, 2048);
     }
