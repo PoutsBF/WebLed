@@ -24,18 +24,20 @@ function hexToDec(hex) {
 
 domReady(function()
 {
-    $('#picker').farbtastic('#idColor');
+    var connection = new WebSocket('ws://' + location.hostname + '/ws');
+    function onCouleur(color) {
+        if (connection.readyState === 1)
+        {
+            document.getElementById("idCouleur").value = color;
+            var couleur = hexToDec(color);
+            connection.send("{couleur:" + couleur + "}");
+        }
+    }
+    $.farbtastic('#picker').linkTo(onCouleur);
 
     function onSelectionMode() {
         if (connection.readyState === 1) {
             connection.send("{mode:" + document.getElementById("idSelectionMode").selectedIndex + "}");
-        }
-    }
-    function onCouleur() {
-        if (connection.readyState === 1)
-        {
-            var couleur = hexToDec(document.getElementById("idColor").value);
-            connection.send("{couleur:" + couleur + "}");
         }
     }
     function onVitesse() {
@@ -54,11 +56,10 @@ domReady(function()
     }
 
     document.getElementById("idSelectionMode").addEventListener("change", onSelectionMode);
-    document.getElementById("idColor").addEventListener("change", onCouleur);
+    document.getElementById("idCouleur").addEventListener("change", onCouleur);
     document.getElementById("idVitesse").addEventListener("change", onVitesse);
     document.getElementById("idLuminosite").addEventListener("change", onLuminosite);
 
-    var connection = new WebSocket('ws://' + location.hostname + '/ws');
     connection.onopen = function ()
     {
         connection.send('{\"Connect\":\"' + new Date() + '\"}');
@@ -71,22 +72,38 @@ domReady(function()
 
     connection.onmessage = function (event)
     {
-        var text = "";
         try
         {
-            var msg = JSON.parse(event.data, (key, value) => {
-                text += "<option id=\"" + key + "\">" + value + "</option>"; });
+            var msg = JSON.parse(event.data);
+            if (msg.hasOwnProperty("modes"))
+            {
+                var text = "";
+                msg["modes"].forEach(function (element) {
+                    text += "<option>" + element + "</option>";
+                });
+                document.getElementById("idSelectionMode").innerHTML = text;
+            }
+            if (msg.hasOwnProperty("mode"))
+            {
+                document.getElementById("idSelectionMode").value = msg["mode"];
+            }
+            if (msg.hasOwnProperty("speed"))
+            {
+                document.getElementById("idVitesse").value = msg["speed"];
+            }
+            if (msg.hasOwnProperty("lum"))
+            {
+                document.getElementById("idLuminosite").value = msg["lum"];
+            }
+            if (msg.hasOwnProperty("couleur"))
+            {
+                $('#picker').farbtastic('#idColor').color = msg["couleur"];
+            }
         }
         catch (e)
         {
             console.error("Parsing error:", e);
             console.log(event.data);
         }
-        
-        if (text.length)
-        {
-            document.getElementById("idSelectionMode").innerHTML = text;
-        }
-};
-    
+    };
 });

@@ -52,7 +52,7 @@ GestionBP gestionBP;
 void setup() 
 {
     Serial.begin(115200);
-//    Serial.setDebugOutput(true);
+    Serial.setDebugOutput(true);
 
     //-----------------------------------------------------------------------
     // Configuration du WIFI
@@ -176,20 +176,18 @@ void setup()
     leds.start();
 
 // objectif : json_liste_mode = {modes:["mode a", "mode b"...]}
-    strncpy(json_liste_modes, "{modes:[", 2048);
+    strncpy(json_liste_modes, "{\"modes\":[", 2048);
     for (uint8_t i = 0; i < leds.getModeCount(); i++)
     {
         char buffer[40];
         if(i == 0)
-            snprintf(buffer, 40, "'%s'", (const char *)leds.getModeName(i));
+            snprintf(buffer, 40, "\"%s\"", (const char *)leds.getModeName(i));
         else
-            snprintf(buffer, 40, ", '%s'", (const char *)leds.getModeName(i));
+            snprintf(buffer, 40, ", \"%s\"", (const char *)leds.getModeName(i));
 
         strncat(json_liste_modes, buffer, 2048);
     }
     strncat(json_liste_modes, "]}", 2048);
-    Serial.println(json_liste_modes);
-    Serial.printf("%d caractères", strlen(json_liste_modes));
 }
 
 /******************************************************************************
@@ -272,10 +270,10 @@ void loop()
         }
         Serial.printf("mode led : %d\n", modeLed);
         leds.setMode(modeLed);
-        char buffer[32];
-        snprintf(buffer, 32, "{mode:%d,speed:%d,couleur:%d,lum:%d}", 
-                    leds.getMode(), leds.getSpeed(),
-                    leds.getColor(), leds.getBrightness());
+        char buffer[48];
+        snprintf(buffer, 48, "{\"mode\":%d,\"speed\":%d,\"couleur\":%d,\"lum\":%d}",
+                 leds.getMode(), leds.getSpeed(),
+                 leds.getColor(), leds.getBrightness());
         ws.textAll(buffer);
     }
 }
@@ -291,8 +289,14 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 
     if (type == WS_EVT_CONNECT)
     {
+        char buffer[48];
+
         Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
         client->text(json_liste_modes);
+        snprintf(buffer, 48, "{\"mode\":%d,\"speed\":%d,\"couleur\":%d,\"lum\":%d}",
+                 leds.getMode(), leds.getSpeed(),
+                 leds.getColor(), leds.getBrightness());
+        client->text(buffer);
         client->ping();
     }
     else if (type == WS_EVT_DISCONNECT)
