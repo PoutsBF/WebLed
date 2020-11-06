@@ -34,6 +34,7 @@ const char *password = YOUR_WIFI_PASSWD;
 const char *hostName = "esp-async";
 const char *http_username = "admin";
 const char *http_password = "admin";
+const char taille_buffer_json = 64;
 
 char json_liste_modes[2048];
 
@@ -201,6 +202,8 @@ void loop()
 //    unsigned long now = millis();
     BP_struct_msg msg;
 
+ //   Serial.printf("heap : %d frag : %d\n", ESP.getFreeHeap(), ESP.getHeapFragmentation());
+
     ArduinoOTA.handle();
     ws.cleanupClients();
 
@@ -270,12 +273,13 @@ void loop()
         }
         Serial.printf("mode led : %d\n", modeLed);
         leds.setMode(modeLed);
-        char buffer[48];
-        snprintf(buffer, 48, "{\"mode\":%d,\"speed\":%d,\"couleur\":%d,\"lum\":%d}",
+        char buffer[taille_buffer_json];
+        snprintf(buffer, taille_buffer_json, "{\"mode\":%d,\"speed\":%d,\"couleur\":%d,\"lum\":%d}",
                  leds.getMode(), leds.getSpeed(),
                  leds.getColor(), leds.getBrightness());
         ws.textAll(buffer);
     }
+
 }
 
 /******************************************************************************
@@ -285,15 +289,15 @@ void loop()
 // onWsEvent : gestion du web socket 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
 {
-    static StaticJsonDocument<200> doc;
+    StaticJsonDocument<200> doc;
 
     if (type == WS_EVT_CONNECT)
     {
-        char buffer[48];
+        char buffer[taille_buffer_json];
 
         Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
         client->text(json_liste_modes);
-        snprintf(buffer, 48, "{\"mode\":%d,\"speed\":%d,\"couleur\":%d,\"lum\":%d}",
+        snprintf(buffer, taille_buffer_json, "{\"mode\":%d,\"speed\":%d,\"couleur\":%d,\"lum\":%d}",
                  leds.getMode(), leds.getSpeed(),
                  leds.getColor(), leds.getBrightness());
         client->text(buffer);
