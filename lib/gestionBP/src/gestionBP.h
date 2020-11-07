@@ -49,7 +49,7 @@ struct BP_struct_pile
 {
     uint8_t idBP;
     uint8_t etat;
-    unsigned long delta;
+    unsigned long time;
 };
 //-----------------------------------------------------------------------------
 //---- Définition des structures ----

@@ -31,24 +31,16 @@ void GestionBP::init(void)
     {
         pile[i].idBP = 0xFF;
     }
-    // DEBUG
-    pinMode(D2, OUTPUT);
-    pinMode(D3, OUTPUT);
 }
 
 ICACHE_RAM_ATTR void GestionBP::interruption(void)
 {
     static uint8_t BP0_p                = 0;
-    static unsigned long BP0_timer_p    = 0;
     static unsigned long BP0_rebond     = 0;
     static uint8_t BP1_p                = 0;
-    static unsigned long BP1_timer_p    = 0;
     static unsigned long BP1_rebond     = 0;
     static uint8_t BP2_p                = 0;
-    static unsigned long BP2_timer_p    = 0;
     static unsigned long BP2_rebond     = 0;
-
-    unsigned long BP_delta;
 
     unsigned long time = millis();
     uint8_t BP0_val = ! digitalRead(BP0_pin);
@@ -58,50 +50,44 @@ ICACHE_RAM_ATTR void GestionBP::interruption(void)
     if ((BP0_p != BP0_val) && ((time - BP0_rebond) > BP_delai_rebond))
     {
         BP0_p = BP0_val;
-        BP_delta = time - BP0_timer_p;
-        BP0_timer_p = time;
         BP0_rebond = time;
-        push(0, BP0_val, BP_delta);
+        push(0, BP0_val, time);
     }
     else if ((BP1_p != BP1_val) && ((time - BP1_rebond) > BP_delai_rebond))
     {
         BP1_p = BP1_val;
-        BP_delta = time - BP1_timer_p;
-        BP1_timer_p = time;
         BP1_rebond = time;
-        push(1, BP1_val, BP_delta);
+        push(1, BP1_val, time);
     }
     else if ((BP2_p != BP2_val) && ((time - BP2_rebond) > BP_delai_rebond))
     {
         BP2_p = BP2_val;
-        BP_delta = time - BP2_timer_p;
-        BP2_timer_p = time;
         BP2_rebond = time;
-        push(2, BP2_val, BP_delta);
+        push(2, BP2_val, time);
     }
 }
 
-void GestionBP::push(uint8_t idBP, uint8_t etat, unsigned long delta)
+void GestionBP::push(uint8_t idBP, uint8_t etat, unsigned long time)
 {
     if(pile[pile_pos_entree].idBP == 0xFF)
     {
         pile[pile_pos_entree].idBP = idBP;
         pile[pile_pos_entree].etat = etat;
-        pile[pile_pos_entree].delta = delta;
+        pile[pile_pos_entree].time = time;
         pile_pos_entree++;
         if(pile_pos_entree == BP_PILE_TAILLE)
             pile_pos_entree = 0;
     }
 }
 
-uint8_t GestionBP::pop(uint8_t *idBP, uint8_t *etat, unsigned long *delta)
+uint8_t GestionBP::pop(uint8_t *idBP, uint8_t *etat, unsigned long *time)
 {
     if (pile[pile_pos_sortie].idBP != 0xFF)
     {
         *idBP = pile[pile_pos_sortie].idBP;
         pile[pile_pos_sortie].idBP = 0xFF;
         *etat = pile[pile_pos_sortie].etat;
-        *delta = pile[pile_pos_sortie].delta;
+        *time = pile[pile_pos_sortie].time;
         pile_pos_sortie++;
         if (pile_pos_sortie == BP_PILE_TAILLE)
             pile_pos_sortie = 0;
@@ -116,121 +102,90 @@ uint8_t GestionBP::pop(uint8_t *idBP, uint8_t *etat, unsigned long *delta)
 
 uint8_t GestionBP::handle(BP_struct_msg *msg)
 {
-    static uint8_t mode = 0;
-    static unsigned long delta_mode_2 = 0;
-    static uint8_t delta_mode_2_BP;
-
     BP_struct_pile pile_traitement;
     uint8_t retour = 0;
 
     msg->idBP = 0xFF;
 
     noInterrupts();
-    uint8_t mess_pop = pop(&pile_traitement.idBP, &pile_traitement.etat, &pile_traitement.delta);
+    uint8_t mess_pop = pop(&pile_traitement.idBP, &pile_traitement.etat, &pile_traitement.time);
     interrupts();
 
     if (mess_pop)
     {
-        switch (mode)
+        switch (pile_traitement.idBP)
         {
-            case 0 :
+            case 0:                 // BP 1 à traiter
             {
-                if (pile_traitement.etat == 1)      // front montant, passe au mode suivant
+                static unsigned long delta = 0;
+                if(pile_traitement.etat)
                 {
-                    mode = 1;
+                    delta = pile_traitement.time;
                 }
-            } break;
-            case 1 :
-            {
-                if (pile_traitement.etat == 0)      // Front descendant, à tester suivant le delta
+                else
                 {
-                    if(pile_traitement.delta < BP_delai_appuie_court)
+                    if (pile_traitement.time - delta > BP_delai_appuie_court)
                     {
-                        delta_mode_2 = millis();        // note l'heure pour ne pas attendre
-                                                        // indéfiniment le prochain appuie
-                        delta_mode_2_BP = pile_traitement.idBP;
-                        mode = 2;                       // attend pour vérifier s'il y a un second appuie
-                    }
-                    else                            // appuie long
-                    {
-                                                    // on envoie directement 
-                        msg->idBP = pile_traitement.idBP;
+                        msg->idBP = 0;
                         msg->idMsg = BP_MESS_APPUIE_LONG;
                         retour = 1;
-                                                         // repart dans le mode d'attente
-                        mode = 0;
-                    }                    
-                }
-                else                                // Erreur, on a loupé un coup...
-                {
-                    mode = 0;
-                }
-            } break;
-            case 2 :
-            {
-                if (pile_traitement.etat == 1)      // Front ascendant, à tester suivant le delta
-                {
-                    if(pile_traitement.delta < BP_delai_double)
-                    {
-                        mode = 3;       // attend pour vérifier s'il y a un second appuie
-                        Serial.println("mode 3");        // DEBUG
                     }
-                    else                            // appuie long
+                    else
                     {
-                                                    // on envoie directement 
-                        msg->idBP = pile_traitement.idBP;
+                        msg->idBP = 0;
                         msg->idMsg = BP_MESS_APPUIE_COURT;
                         retour = 1;
-                                                    // repart dans le mode d'attente
-                        mode = 0;
                     }                    
                 }
-                else                                // Erreur, on a loupé un coup...
-                {
-                    mode = 0;
-                }
             } break;
-            case 3 :
+            case 1:                 // BP 1 à traiter
             {
-                if (pile_traitement.etat == 0)      // Front descendant, à tester suivant le delta
+                static unsigned long delta = 0;
+                if (pile_traitement.etat)
                 {
-                    if(pile_traitement.delta < BP_delai_appuie_court)
+                    delta = pile_traitement.time;
+                }
+                else
+                {
+                    if (pile_traitement.time - delta > BP_delai_appuie_court)
                     {
-                        msg->idBP = pile_traitement.idBP;
-                        msg->idMsg = BP_MESS_APPUIE_DOUBLE;
-                        retour = 1;
-                    }
-                    else                            // appuie long
-                    {
-                                                    // on envoie directement 
-                                                    // Chercher une solution pour envoyer aussi
-                                                    // le premier clic...
-                        msg->idBP = pile_traitement.idBP;
+                        msg->idBP = 1;
                         msg->idMsg = BP_MESS_APPUIE_LONG;
                         retour = 1;
-                    }                    
+                    }
+                    else
+                    {
+                        msg->idBP = 1;
+                        msg->idMsg = BP_MESS_APPUIE_COURT;
+                        retour = 1;
+                    }
                 }
-                mode = 0;        // repart dans le mode d'attente
+            } break;
+            case 2:                 // BP 2 à traiter
+            {
+                static unsigned long delta = 0;
+                if (pile_traitement.etat)
+                {
+                    delta = pile_traitement.time;
+                }
+                else
+                {
+                    if (pile_traitement.time - delta > BP_delai_appuie_court)
+                    {
+                        msg->idBP = 2;
+                        msg->idMsg = BP_MESS_APPUIE_LONG;
+                        retour = 1;
+                    }
+                    else
+                    {
+                        msg->idBP = 2;
+                        msg->idMsg = BP_MESS_APPUIE_COURT;
+                        retour = 1;
+                    }
+                }
             } break;
         }
     }
-    else
-    {
-        // Cas particulier du mode 2 : au delà du délai, envoie un message court et repasse en mode 2
-        if(mode == 2)
-        {
-            if ((millis() - delta_mode_2) > BP_delai_double)
-            {
-                // on envoie directement
-                msg->idBP = delta_mode_2_BP;
-                msg->idMsg = BP_MESS_APPUIE_COURT;
-                retour = 1;
-                // repart dans le mode d'attente
-                mode = 0;
-            }
-        }
-    }
-
     return retour;
 }
 
