@@ -1,3 +1,15 @@
+/******************************************************************************
+    WebLed                                         Stéphane Lepoutère (c) 2020
+
+    Observe l'arrivée de changement d'état sur les BP (interruption)
+    Gère le débounce
+    Détecte les appuis courts, longs, doubles clics et l'état instantané
+    2020-11-07 : modification de la philosophie du double clic :
+        un double clic est considéré comme un clic qui arrive dans un délai 
+        court après le précédent. Le premier clic est sensé avoir été pris 
+        en compte.
+*/
+
 #include <ArduinoOTA.h>
 
 #include <ESP8266WiFi.h>
@@ -7,7 +19,8 @@
 
 #include "WifiConfig.h"
 
-#include <SPIFFSEditor.h>
+//#include <SPIFFSEditor.h>
+#include <littleFS.h>
 
 #include <WS2812FX.h>
 
@@ -20,8 +33,8 @@
 #define LED_PIN D1
 // nombre de leds
 #define LED_COUNT 8
-// définir les intervals des leds
-unsigned long led_interval = 5000;
+    // définir les intervals des leds
+    unsigned long led_interval = 5000;
 // création de l'objet led
 WS2812FX leds = WS2812FX(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800);
 
@@ -97,14 +110,14 @@ void setup()
 
     MDNS.addService("http", "tcp", 80);
 
-    SPIFFS.begin();
+    LittleFS.begin();
     ws.onEvent(onWsEvent);
     server.addHandler(&ws);
-    server.addHandler(new SPIFFSEditor(http_username, http_password));
+//    server.addHandler(new SPIFFSEditorEditor(http_username, http_password));
     server.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
-    server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.htm");
+    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.htm");
 
     server.onNotFound([](AsyncWebServerRequest *request) {
         Serial.printf("NOT_FOUND: ");
