@@ -13,8 +13,8 @@
 
 #include "WifiConfig.h"
 
-#include <SPIFFSEditor.h>
-//#include <littleFS.h>
+//#include <SPIFFSEditor.h>
+#include <littleFS.h>
 
 #include <WS2812FX.h>
 
@@ -105,14 +105,14 @@ void setup()
     MDNS.addService("http", "tcp", 80);
     MDNS.setHostname("myWebLed1");
 
-    SPIFFS.begin();
+    LittleFS.begin();
     ws.onEvent(onWsEvent);
     server.addHandler(&ws);
 //    server.addHandler(new SPIFFSEditor(http_username, http_password));
     server.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
-    server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.htm");
+    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.htm");
 
     server.onNotFound([](AsyncWebServerRequest *request) {
         Serial.printf("NOT_FOUND: ");
