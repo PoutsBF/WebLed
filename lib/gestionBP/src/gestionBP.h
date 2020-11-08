@@ -19,7 +19,7 @@
 //---- Définition des constantes ----
 const unsigned long BP_delai_appuie_court = 500;
 const unsigned long BP_delai_appuie_long = 500;
-const unsigned long BP_delai_double = 500;
+const unsigned long BP_delai_double = 300;
 const unsigned long BP_delai_rebond = 5;
 enum BP_MESSAGES
 {
@@ -49,7 +49,7 @@ struct BP_struct_pile
 {
     uint8_t idBP;
     uint8_t etat;
-    unsigned long delta;
+    unsigned long time;
 };
 //-----------------------------------------------------------------------------
 //---- Définition des structures ----

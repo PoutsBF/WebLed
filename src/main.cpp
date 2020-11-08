@@ -13,8 +13,8 @@
 
 #include "WifiConfig.h"
 
-//#include <SPIFFSEditor.h>
-#include <littleFS.h>
+#include <SPIFFSEditor.h>
+//#include <littleFS.h>
 
 #include <WS2812FX.h>
 
@@ -60,7 +60,7 @@ GestionBP gestionBP;
 void setup() 
 {
     Serial.begin(115200);
-    Serial.setDebugOutput(true);
+    Serial.setDebugOutput(false);
 
     //-----------------------------------------------------------------------
     // Configuration du WIFI
@@ -103,15 +103,16 @@ void setup()
     // Configuration du système de fichier, du serveur web et du websocket
 
     MDNS.addService("http", "tcp", 80);
+    MDNS.setHostname("myWebLed1");
 
-    LittleFS.begin();
+    SPIFFS.begin();
     ws.onEvent(onWsEvent);
     server.addHandler(&ws);
-//    server.addHandler(new SPIFFSEditorEditor(http_username, http_password));
+//    server.addHandler(new SPIFFSEditor(http_username, http_password));
     server.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
-    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.htm");
+    server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.htm");
 
     server.onNotFound([](AsyncWebServerRequest *request) {
         Serial.printf("NOT_FOUND: ");
@@ -204,7 +205,7 @@ void setup()
 void loop()
 {
 //    static unsigned long led_tempo = 0;
-    static uint8_t modeLed = 0;
+    uint8_t modeLed = leds.getMode();
 
 //    unsigned long now = millis();
     BP_struct_msg msg;
@@ -266,11 +267,11 @@ void loop()
             {
                 if (msg.idMsg == BP_MESS_APPUIE_COURT)
                 {
-                    leds.setSpeed((leds.getSpeed() > 10) ? (leds.getSpeed() - 1) : 0);
+                    leds.setSpeed((leds.getSpeed() > 10) ? (leds.getSpeed() - 10) : 0);
                 }
                 else if (msg.idMsg == BP_MESS_APPUIE_LONG)
                 {
-                    leds.setSpeed(leds.getSpeed() - 1);
+                    leds.setSpeed(leds.getSpeed() + 10);
                 }
                 else if (msg.idMsg == BP_MESS_APPUIE_DOUBLE)
                 {
@@ -278,15 +279,14 @@ void loop()
                 }
             } break;
         }
-        Serial.printf("mode led : %d\n", modeLed);
         leds.setMode(modeLed);
         char buffer[taille_buffer_json];
         snprintf(buffer, taille_buffer_json, "{\"mode\":%d,\"speed\":%d,\"couleur\":%d,\"lum\":%d}",
                  leds.getMode(), leds.getSpeed(),
                  leds.getColor(), leds.getBrightness());
         ws.textAll(buffer);
+        Serial.printf("état led : %s\n", buffer);
     }
-
 }
 
 /******************************************************************************
