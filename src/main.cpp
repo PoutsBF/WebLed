@@ -13,7 +13,6 @@
 
 #include "WifiConfig.h"
 
-//#include <SPIFFSEditor.h>
 #include <littleFS.h>
 
 #include <WS2812FX.h>
@@ -108,7 +107,6 @@ void setup()
     LittleFS.begin();
     ws.onEvent(onWsEvent);
     server.addHandler(&ws);
-//    server.addHandler(new SPIFFSEditor(http_username, http_password));
     server.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", String(ESP.getFreeHeap()));
     });
