@@ -118,70 +118,100 @@ uint8_t GestionBP::handle(BP_struct_msg *msg)
             case 0:                 // BP 1 à traiter
             {
                 static unsigned long delta = 0;
-                if(pile_traitement.etat)
+                static unsigned long delta_dbl = 0;
+                static uint8_t flag_double = 0;
+                if (pile_traitement.etat)       // Front montant
                 {
-                    delta = pile_traitement.time;
-                }
-                else
-                {
-                    if (pile_traitement.time - delta > BP_delai_appuie_court)
+                    if (flag_double)
                     {
-                        msg->idBP = 0;
-                        msg->idMsg = BP_MESS_APPUIE_LONG;
-                        retour = 1;
+                        flag_double = 0;
                     }
                     else
                     {
-                        msg->idBP = 0;
-                        msg->idMsg = BP_MESS_APPUIE_COURT;
-                        retour = 1;
-                    }                    
+                        flag_double = (pile_traitement.time - delta_dbl > BP_delai_double) ? 0 : 1;
+                    }
+
+                    delta_dbl = pile_traitement.time;
+                    delta = pile_traitement.time;
+                }
+                else                            // Front descendant
+                {
+                    if (pile_traitement.time - delta > BP_delai_appuie_court)
+                    {           // si c'est un appuie long ?
+                        msg->idMsg = BP_MESS_APPUIE_LONG;
+                    }
+                    else
+                    {           // Si cest un appuie court ?
+                        msg->idMsg = (flag_double) ? BP_MESS_APPUIE_DOUBLE : BP_MESS_APPUIE_COURT;
+                    }
+                    msg->idBP = 0;
+                    retour = 1;        // envoyer le message appuie court / long / double sur le BP0
                 }
             } break;
             case 1:                 // BP 1 à traiter
             {
                 static unsigned long delta = 0;
-                if (pile_traitement.etat)
+                static unsigned long delta_dbl = 0;
+                static uint8_t flag_double = 0;
+                if (pile_traitement.etat)       // Front montant
                 {
-                    delta = pile_traitement.time;
-                }
-                else
-                {
-                    if (pile_traitement.time - delta > BP_delai_appuie_court)
+                    if (flag_double)
                     {
-                        msg->idBP = 1;
-                        msg->idMsg = BP_MESS_APPUIE_LONG;
-                        retour = 1;
+                        flag_double = 0;
                     }
                     else
                     {
-                        msg->idBP = 1;
-                        msg->idMsg = BP_MESS_APPUIE_COURT;
-                        retour = 1;
+                        flag_double = (pile_traitement.time - delta_dbl > BP_delai_double) ? 0 : 1;
                     }
+
+                    delta_dbl = pile_traitement.time;
+                    delta = pile_traitement.time;
+                }
+                else                            // Front descendant
+                {
+                    if (pile_traitement.time - delta > BP_delai_appuie_court)
+                    {           // si c'est un appuie long ?
+                        msg->idMsg = BP_MESS_APPUIE_LONG;
+                    }
+                    else
+                    {           // Si cest un appuie court ?
+                        msg->idMsg = (flag_double) ? BP_MESS_APPUIE_DOUBLE : BP_MESS_APPUIE_COURT;
+                    }
+                    msg->idBP = 1;
+                    retour = 1;        // envoyer le message appuie court / long / double sur le BP1
                 }
             } break;
             case 2:                 // BP 2 à traiter
             {
                 static unsigned long delta = 0;
-                if (pile_traitement.etat)
+                static unsigned long delta_dbl = 0;
+                static uint8_t flag_double = 0;
+                if (pile_traitement.etat)       // Front montant
                 {
-                    delta = pile_traitement.time;
-                }
-                else
-                {
-                    if (pile_traitement.time - delta > BP_delai_appuie_court)
+                    if(flag_double)
                     {
-                        msg->idBP = 2;
-                        msg->idMsg = BP_MESS_APPUIE_LONG;
-                        retour = 1;
+                        flag_double = 0;
                     }
                     else
                     {
-                        msg->idBP = 2;
-                        msg->idMsg = BP_MESS_APPUIE_COURT;
-                        retour = 1;
+                        flag_double = (pile_traitement.time - delta_dbl > BP_delai_double) ? 0 : 1;
                     }
+
+                    delta_dbl = pile_traitement.time;
+                    delta = pile_traitement.time;
+                }
+                else                            // Front descendant
+                {
+                    if (pile_traitement.time - delta > BP_delai_appuie_court)
+                    {           // si c'est un appuie long ?
+                        msg->idMsg = BP_MESS_APPUIE_LONG;
+                    }
+                    else
+                    {           // Si cest un appuie court ?
+                        msg->idMsg = (flag_double) ? BP_MESS_APPUIE_DOUBLE : BP_MESS_APPUIE_COURT;
+                    }
+                    msg->idBP = 2;
+                    retour = 1;        // envoyer le message appuie court / long / double sur le BP2
                 }
             } break;
         }
