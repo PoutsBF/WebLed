@@ -37,7 +37,7 @@ AsyncWebSocket ws("/ws");
 
 const char *ssid = YOUR_WIFI_SSID;
 const char *password = YOUR_WIFI_PASSWD;
-const char *hostName = "esp-async";
+const char *hostName = "esp-STLP-01";
 const char *http_username = "admin";
 const char *http_password = "admin";
 const char taille_buffer_json = 64;
@@ -73,7 +73,6 @@ void setup()
         delay(1000);
         WiFi.begin(ssid, password);
     }
-
   //-----------------------------------------------------------------------
   // Programmation Over The Air
     ArduinoOTA.setHostname(hostName);
@@ -170,8 +169,10 @@ void setup()
     //-------------------------------------------------------------------------
     // Affichage des informations de connexion
     Serial.println("Ready");
-    Serial.print("IP address: ");
+    Serial.print("IP address locale : ");
     Serial.println(WiFi.localIP());
+    Serial.print("IP address AP : ");
+    Serial.println(WiFi.softAPIP());
 
     gestionBP.init();
 
@@ -202,7 +203,8 @@ void setup()
 ******************************************************************************/
 void loop()
 {
-//    static unsigned long led_tempo = 0;
+    static uint8_t wifi_connect = 0;
+    //    static unsigned long led_tempo = 0;
     uint8_t modeLed = leds.getMode();
 
 //    unsigned long now = millis();
@@ -212,10 +214,16 @@ void loop()
 
     ArduinoOTA.handle();
     ws.cleanupClients();
-
     leds.service();
 
-    if(gestionBP.handle(&msg))
+    uint8_t nb_connect = WiFi.softAPgetStationNum();
+    if(nb_connect != wifi_connect)
+    {
+        wifi_connect = nb_connect;
+        Serial.printf("Stations connected = %d\n", wifi_connect);
+    }
+
+    if (gestionBP.handle(&msg))
     {
         Serial.printf("BP%d - msg %d\n", msg.idBP, msg.idMsg);
         switch (msg.idBP)
