@@ -1,105 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>gestion néopixel</title>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="description" content="Source code generated using layoutit.com">
-    <meta name="author" content="LayoutIt!">
+	<title>gestion néopixel</title>
+
+	<meta name="description" content="Source code generated using layoutit.com">
+	<meta name="author" content="LayoutIt!">
 
 	<link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="css/style.css" type="text/css" />
+	<link rel="stylesheet" href="css/style.css" type="text/css" />
 
 	<script src="js/jquery-3.4.1.slim.min.js"></script>
 
 	<link rel="stylesheet" href="css/farbtastic.css" type="text/css" />
-	<script type="text/javascript" src="js/farbtastic.js"></script>
+  <script type="text/javascript" src="js/tether.min.js"></script>	
+  <script type="text/javascript" src="js/farbtastic.js"></script>
 	<script type="text/javascript" src="js/scripts.js"></script>
 
-  </head>
-  <body>
+</head>
 
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-md-12">
-			<h1 class="text-center">
-				Gestion bandeau néopixel
-			</h1>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-4">
-		<form>
-			<div class="form-group">
-				<button id="bt01" type="button" class="btn btn-success">
-					led 1
-				</button>
-				<button id="bt02" type="button" class="btn btn-success">
-					led 2
-				</button>
-				<button id="bt03" type="button" class="btn btn-success">
-					led 3
-				</button>
-				<button id="bt04" type="button" class="btn btn-success">
-					led 4
-				</button>
-				<button id="bt05" type="button" class="btn btn-success">
-					led 5
-				</button>
-				<button id="bt06" type="button" class="btn btn-success">
-					led 6
-				</button>
-				<button id="bt07" type="button" class="btn btn-success">
-					led 7
-				</button>
-				<button id="bt08" type="button" class="btn btn-success">
-					led 8
-				</button>
+<body>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-12">
+				<h1 class="text-center">
+					Gestion bandeau néopixel
+				</h1>
 			</div>
-		</form>
 		</div>
-		<div class="col-md-4">
-			<form>
-				<select id="idSelectionMode" class="form-control" size="5">
-					<option>à compléter</option>
-				</select>
-				<div class="form-group">
-					<label for="rangeVitesse">Vitesse</label>
-					<input type="range" class="form-control-range" id="idVitesse" min="1" max="2001" step="20">
-					<label for="rangeBrillance">Brillance</label>
-					<input type="range" class="form-control-range" id="idLuminosite" min="0" max="255" step="5">
-				</div>
-			</form>
-		</div>
-		<div class="col-md-4">
-		<form>
-			<div class="form-group">
-				<div class="form-item">
-					<label for="color">Color:</label>
-					<input type="text" id="idCouleur" name="color" value="#000000" />
-				</div>
-				<div id="picker"></div>
+		<div class="row">
+			<div class="col-md-4">
+				<h3>
+					Infos
+				</h3>
+				<button id="btInfoConnection" type="button" class="btn btn-block btn-lg btn-danger" title="état...">
+					déconnecté
+				</button>
+				<p>
+					adresse IP : <span id="IPserveurWS"></span>
+				</p>
+				<p id="affModeSelect" class="text-center">
+					mode sélectionné
+				</p>
 			</div>
-		</form>
+			<div class="col-md-4">
+				<form>
+					<select id="idSelectionMode" class="form-control" size="5">
+						<option>à compléter</option>
+					</select>
+					<div class="form-group">
+						<label for="rangeVitesse">Vitesse</label>
+						<input type="range" class="form-control-range" id="idVitesse" min="1" max="2001" step="20">
+						<label for="rangeBrillance">Brillance</label>
+						<input type="range" class="form-control-range" id="idLuminosite" min="0" max="255" step="5">
+					</div>
+				</form>
+			</div>
+			<div class="col-md-4">
+				<form>
+					<div class="form-group">
+						<div class="form-item">
+							<label for="color">Color:</label>
+							<input type="text" id="idCouleur" name="color" value="#000000" />
+						</div>
+						<div id="picker"></div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+			</div>
+			<div class="col-md-4">
+				<p class="text-center">
+					Stéphane Lepoutère<br />(c) 2020
+				</p>
+			</div>
+			<div class="col-md-4">
+			</div>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-md-4">
-		</div>
-		<div class="col-md-4">
-			<p class="text-center">
-				Stéphane Lepoutère<br />(c) 2020
-			</p>
-		</div>
-		<div class="col-md-4">
-		</div>
-	</div>
-</div>
 	<script src="js/popper.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
 
-  </body>
+</body>
+
 </html>

@@ -24,7 +24,9 @@ function hexToDec(hex) {
 
 domReady(function()
 {
+  var idTimer;
     var connection = new WebSocket('ws://' + location.hostname + '/ws');
+//    var connection = new WebSocket('ws://' + location.hostname + ':81');
     function onCouleur(color) {
         if (connection.readyState === 1)
         {
@@ -60,14 +62,48 @@ domReady(function()
     document.getElementById("idVitesse").addEventListener("change", onVitesse);
     document.getElementById("idLuminosite").addEventListener("change", onLuminosite);
 
-    connection.onopen = function ()
+    function onTimerWS()
+    {
+      switch(connection.readyState)
+      {
+        case 0:
+              document.getElementById("btInfoConnection").innerHTML = "en connexion";
+              document.getElementById("btInfoConnection").setAttribute("title", "socket créé mais la connexion n'est pas encore ouverte");          
+          break;
+        case 1:
+              document.getElementById("btInfoConnection").innerHTML = "connecté";
+              document.getElementById("btInfoConnection").setAttribute("title", "Connexion ouverte et prête à communiquer");          
+          break;
+        case 2:
+              document.getElementById("btInfoConnection").innerHTML = "fermeture en cours";
+              document.getElementById("btInfoConnection").setAttribute("title", "Connexion encore ouverte, mais en cours de fermeture");          
+          break;
+        case 3:
+              document.getElementById("btInfoConnection").innerHTML = "déconnecté";
+              document.getElementById("btInfoConnection").setAttribute("title", "Connexion fermée ou ne pouvant être ouverte");          
+          break;
+      };
+    }
+    
+    connection.onopen = function (evt)
     {
         connection.send('{\"Connect\":\"' + new Date() + '\"}');
+        document.getElementById("btInfoConnection").classList.remove("btn-danger");
+        document.getElementById("btInfoConnection").classList.add("btn-success");
+        idTimer = setInterval(onTimerWS, 3000);
     };
 
     connection.onerror = function (error)
     {
         console.log('WebSocket Error ', error);
+    };
+
+    connection.onclose = function (evt)
+    {
+        console.log('WebSocket fermeture ', evt);
+        document.getElementById("btInfoConnection").classList.remove("btn-success");
+        document.getElementById("btInfoConnection").classList.add("btn-danger");
+        clearInterval(idTimer);
     };
 
     connection.onmessage = function (event)
