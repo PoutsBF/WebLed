@@ -34,7 +34,6 @@ WS2812FX leds = WS2812FX(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800);
 // ----- création des objets serveurs et paramètres ---
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
-
 const char *ssid = YOUR_WIFI_SSID;
 const char *password = YOUR_WIFI_PASSWD;
 const char *hostName = "esp-STLP-01";

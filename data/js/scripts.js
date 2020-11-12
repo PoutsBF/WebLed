@@ -104,6 +104,7 @@ domReady(function()
         document.getElementById("btInfoConnection").classList.remove("btn-success");
         document.getElementById("btInfoConnection").classList.add("btn-danger");
         clearInterval(idTimer);
+        onTimerWS();
     };
 
     connection.onmessage = function (event)
