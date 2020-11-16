@@ -27,6 +27,13 @@ FreeRTOS ; Adafruit pour le BME680 ; ESPHome pour la gestion web asynchrone ; ..
 ## ArdinoJSON par Benoit Blanchon
 <https://arduinojson.org/v6/example/parser/>
 
+## Bootstrap
+<https://getbootstrap.com/>
+## range-slider 
+<https://seiyria.com/bootstrap-slider/>
+## pour facilement faire le squelette html
+<https://www.layoutit.com/>
+
 # Résultats
 A compléter...
 
