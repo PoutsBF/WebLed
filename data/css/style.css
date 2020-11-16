@@ -1,1 +1,12 @@
-# Empty CSS file for your own CSS
+#ex1Slider .slider-selection {
+	background: #BABABA;
+}
+
+.ex1Slider{
+    width: 100%;
+    display: block;
+}
+.slider.slider-horizontal{
+    width: 100% !important;
+    display: block;
+}

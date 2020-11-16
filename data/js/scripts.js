@@ -52,15 +52,13 @@ domReady(function()
     function onLuminosite() {
         if (connection.readyState === 1)
         {
-            var luminosite = document.getElementById("idLuminosite").value;
+            var luminosite = document.getElementById("idLuminosite").value * 255 / 100;
             connection.send("{lum:" + luminosite + "}");
         }
     }
 
     document.getElementById("idSelectionMode").addEventListener("change", onSelectionMode);
     document.getElementById("idCouleur").addEventListener("change", onCouleur);
-    document.getElementById("idVitesse").addEventListener("change", onVitesse);
-    document.getElementById("idLuminosite").addEventListener("change", onLuminosite);
 
     function onTimerWS()
     {
@@ -143,4 +141,19 @@ domReady(function()
             console.log(event.data);
         }
     };
-});
+//----------------------- range -----------------------------------------------
+    var slider = new Slider('#idVitesse', {
+        formatter: function (value) {
+            return 'délai (ms): ' + value;
+        },
+        min: 1,
+        max: 2000
+    }).on("change", onVitesse);
+    var slider = new Slider('#idLuminosite', {
+        formatter: function (value) {
+            return '%: ' + value;
+        },
+        min: 1,
+        max: 100
+    }).on("change", onLuminosite);
+});  // fin domReady
