@@ -22,11 +22,10 @@ function hexToDec(hex) {
     return result;
 }
 
-domReady(function()
-{
-  var idTimer;
+domReady(function () {
+    var idTimer;
     var connection = new WebSocket('ws://' + location.hostname + '/ws');
-//    var connection = new WebSocket('ws://' + location.hostname + ':81');
+    //    var connection = new WebSocket('ws://' + location.hostname + ':81');
     function onCouleur(color) {
         if (connection.readyState === 1)
         {
@@ -38,8 +37,18 @@ domReady(function()
     $.farbtastic('#picker').linkTo(onCouleur);
 
     function onSelectionMode() {
-        if (connection.readyState === 1) {
-            connection.send("{mode:" + document.getElementById("idSelectionMode").selectedIndex + "}");
+        if (connection.readyState === 1)
+        {
+            var choixMode = document.getElementById("idSelectionMode").selectedIndex;
+            if (choixMode != -1)
+            {
+                connection.send("{mode:" + document.getElementById("idSelectionMode").selectedIndex + "}");
+                document.getElementById("affModeSelect").innerText = document.getElementById("idSelectionMode").options[choixMode].label;
+            }
+            else
+            {
+                document.getElementById("affModeSelect").innerText = "pas de mode sélectionné";
+            }
         }
     }
     function onVitesse() {
@@ -88,6 +97,7 @@ domReady(function()
         connection.send('{\"Connect\":\"' + new Date() + '\"}');
         document.getElementById("btInfoConnection").classList.remove("btn-danger");
         document.getElementById("btInfoConnection").classList.add("btn-success");
+        document.getElementById("IPserveurWS").innerHTML = location.hostname;
         idTimer = setInterval(onTimerWS, 3000);
     };
 
